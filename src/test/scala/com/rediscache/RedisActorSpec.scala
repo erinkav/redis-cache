@@ -4,29 +4,14 @@ import akka.actor.ActorSystem
 import akka.testkit.{ ImplicitSender, TestActors, TestKit }
 import com.redis.RedisClient
 import com.rediscache.RedisActor.GetValue
+import com.typesafe.config.ConfigFactory
 import org.scalatest.{ BeforeAndAfterAll, Matchers, WordSpecLike }
 
-//class MySpec() extends TestKit(ActorSystem("MySpec")) with ImplicitSender
-//  with WordSpecLike with Matchers with BeforeAndAfterAll {
-//
-//  override def afterAll: Unit = {
-//    TestKit.shutdownActorSystem(system)
-//  }
-//
-//  "An Echo actor" must {
-//
-//    "send back messages unchanged" in {
-//      val echo = system.actorOf(TestActors.echoActorProps)
-//      echo ! "hello world"
-//      expectMsg("hello world")
-//    }
-//
-//  }
-//}
 class RedisActorSpec() extends TestKit(ActorSystem("Spec")) with ImplicitSender with WordSpecLike
   with Matchers with BeforeAndAfterAll {
-
-  var redisClient: RedisClient = RedisInterface.client
+  val config = ConfigFactory.load()
+  val redisConfig = config.getConfig("application").getConfig("redis")
+  var redisClient: RedisClient = new RedisInterface(redisConfig).client
   val cacheActor = system.actorOf(RedisActor.props)
 
   override def beforeAll: Unit = {

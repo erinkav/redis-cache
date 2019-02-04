@@ -7,6 +7,7 @@ import akka.http.scaladsl.marshalling.Marshal
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import com.redis.RedisClient
+import com.typesafe.config.ConfigFactory
 import org.scalatest.{ BeforeAndAfterAll, Matchers, WordSpec }
 import org.scalatest.concurrent.ScalaFutures
 
@@ -20,9 +21,12 @@ class RoutesSpec extends WordSpec with BeforeAndAfterAll with Matchers with Scal
   // but we could "mock" it by implementing it in-place or by using a TestProbe()
   override val redisActor: ActorRef =
     system.actorOf(RedisActor.props, "cacheActor")
-
+  override val localCacheActor: ActorRef = system.actorOf(LocalCacheActor.props, "localCacheActor")
   lazy val routes = route
-  var redisClient: RedisClient = RedisInterface.client
+  val config = ConfigFactory.load()
+  val redisConfig = config.getConfig("application").getConfig("redis")
+  var redisClient: RedisClient = new RedisInterface(redisConfig).client
+
   override def beforeAll() {
     redisClient.set("test1", "{}")
     redisClient.set("test2", Map("testValue" -> List("value")))
