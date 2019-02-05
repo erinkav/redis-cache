@@ -1,3 +1,5 @@
 *.class
 .idea
+.sbt
+.ivy2
 target/

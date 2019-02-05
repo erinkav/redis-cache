@@ -2,7 +2,7 @@ package com.rediscache
 
 import akka.actor.{ ActorRef, ActorSystem }
 import akka.testkit.{ ImplicitSender, TestKit }
-import com.rediscache.LocalCacheActor.{SetCachedValue, GetCachedValue}
+import com.rediscache.LocalCacheActor.{ SetCachedValue, GetCachedValue }
 import com.typesafe.config.{ Config, ConfigFactory }
 import org.scalatest.{ BeforeAndAfterAll, Matchers, WordSpecLike }
 
@@ -11,10 +11,6 @@ class LocalLfuCacheActorSpec() extends TestKit(ActorSystem("Spec")) with Implici
   val config: Config = ConfigFactory.load()
   val localLfuCacheConfig: Config = config.getConfig("application").getConfig("localCache")
   val cacheActor: ActorRef = system.actorOf(LocalCacheActor.props)
-
-  override def beforeAll: Unit = {
-
-  }
 
   override def afterAll: Unit = {
     TestKit.shutdownActorSystem(system)

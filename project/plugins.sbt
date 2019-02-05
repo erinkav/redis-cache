@@ -1,3 +1,6 @@
 addSbtPlugin("org.scalariform" % "sbt-scalariform" % "1.8.2")
-
 addSbtPlugin("io.spray" % "sbt-revolver" % "0.9.1")
+addSbtPlugin("io.gatling" % "gatling-sbt" % "3.0.0")
+addSbtPlugin("com.typesafe.sbt" % "sbt-native-packager" % "1.3.17")
+addSbtPlugin("com.waioeka.sbt" % "cucumber-plugin" % "0.1.7")
+addSbtPlugin("com.tapad" % "sbt-docker-compose" % "1.0.34")

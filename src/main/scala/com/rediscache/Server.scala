@@ -14,9 +14,7 @@ object QuickstartServer extends App with Routes {
 
   val config = ConfigFactory.load()
   val appConfig = config.getConfig("application")
-
   val redisConfig = appConfig.getConfig("redis")
-  //  val localCacheConfig = appConfig.getConfig("localCache")
 
   implicit val system: ActorSystem = ActorSystem("redisCacheHttpServer", config)
   implicit val materializer: ActorMaterializer = ActorMaterializer()
@@ -27,6 +25,7 @@ object QuickstartServer extends App with Routes {
   val localCacheActor: ActorRef = system.actorOf(LocalCacheActor.props, "localCacheActor")
   lazy val routes: Route = route
 
+  // Host and port are configurable in the application configs
   val host: String = appConfig.getString("host")
   val port: Int = appConfig.getInt("port")
   val serverBinding: Future[Http.ServerBinding] = Http().bindAndHandle(routes, host, port)

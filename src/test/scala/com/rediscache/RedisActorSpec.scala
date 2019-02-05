@@ -1,7 +1,7 @@
 package com.rediscache
 
 import akka.actor.ActorSystem
-import akka.testkit.{ ImplicitSender, TestActors, TestKit }
+import akka.testkit.{ ImplicitSender, TestActorRef, TestActors, TestKit, TestProbe }
 import com.redis.RedisClient
 import com.rediscache.RedisActor.GetValue
 import com.typesafe.config.ConfigFactory
@@ -22,17 +22,18 @@ class RedisActorSpec() extends TestKit(ActorSystem("Spec")) with ImplicitSender 
     TestKit.shutdownActorSystem(system)
   }
 
-  "Redis actor" must {
-    "Retrieve values from the Redis cache" in {
+  val parent = TestProbe()
+
+  "RedisActor" must {
+    "retrieve values from the Redis cache" in {
       cacheActor ! GetValue("actorTest")
       expectMsg(Some("actorValue"))
     }
 
-    "Not throw an error if value does not exist in cache" in {
+    "not throw an error if value does not exist in cache" in {
       cacheActor ! GetValue("blah")
       expectMsg(None)
     }
-
   }
 
 }

@@ -2,13 +2,13 @@ package com.rediscache
 
 import java.time.Duration
 
-import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
+import org.scalatest.{ BeforeAndAfterAll, Matchers, WordSpecLike }
 
 import scala.util.Random
 
 class LocalLfuCacheSpec extends WordSpecLike with Matchers with BeforeAndAfterAll {
   def randomStringGenerator(): String = Random.alphanumeric.take(10).mkString
-  val smallCache = new LocalLfuCache(capacity = 4, globalExpiration = new Duration(5, "seconds"))
+  val smallCache = new LocalLfuCache(capacity = 4, globalExpiration = Duration.ofSeconds(5))
   "It should set values if not present in the cache" in {
     smallCache.set("test1", Option("value1"))
     assert(smallCache.get("test1") == Option("value1"))
@@ -33,7 +33,7 @@ class LocalLfuCacheSpec extends WordSpecLike with Matchers with BeforeAndAfterAl
   }
 
   "It should not return a value if expiration limit is reached" in {
-    val timeConstrainedCache = new LocalLfuCache(capacity = 5, globalExpiration = new Duration(5, "millis"))
+    val timeConstrainedCache = new LocalLfuCache(capacity = 5, globalExpiration = Duration.ofMillis(5))
     timeConstrainedCache.set("tempVal", Option("value"))
     Thread.sleep(100)
     assert(timeConstrainedCache.get("tempVal").isEmpty)

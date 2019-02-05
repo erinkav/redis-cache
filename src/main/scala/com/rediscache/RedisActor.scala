@@ -19,7 +19,7 @@ class RedisActor extends Actor with ActorLogging {
 
   var redis: RedisClient = _
   val config: Config = context.system.settings.config
-  val redisConfig = config.getConfig("application.redis")
+  val redisConfig: Config = config.getConfig("application.redis")
 
   override def preStart(): Unit = {
     try {
@@ -39,7 +39,9 @@ class RedisActor extends Actor with ActorLogging {
       val value = redis.get(key)
       log.info(s"$key found in Redis cache ${value.toString}")
 
+      // Parent actor is the localLFUCache. Update cache with value found in Redis. This is an asynchonous operation
       context.parent ! SetCachedValue(key, value)
+      // Request was forwarded to this actor. Send Tell back to caller
       sender() ! value
     case _ => throw new Exception("Unidentified call to Redis actor")
 

@@ -11,7 +11,18 @@ class RedisInterface(config: Config) {
   def client: RedisClient = new RedisClient(host, port)
 
   def get(key: String): Option[String] = {
-    println("get" + key)
     client.get(key)
+  }
+
+  def set(key: String, value: String): Unit = {
+    client.set(key, value)
+  }
+
+  def clear(): Unit = {
+    client.flushall
+  }
+
+  def disconnect(): Unit = {
+    client.disconnect
   }
 }
