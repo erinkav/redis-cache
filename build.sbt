@@ -24,7 +24,6 @@ lazy val root = (project in file(".")).
       "com.typesafe.akka" %% "akka-http-caching"    % "10.1.7",
       "io.gatling"        % "gatling-test-framework" % "3.0.3" % Test,
       "io.gatling.highcharts" % "gatling-charts-highcharts" % "3.0.3" % Test,
-     // "io.cucumber"        %% "cucumberber-scala"      % "4.2.0"         % Test,
       "com.typesafe.akka" %% "akka-http-testkit"    % akkaHttpVersion % Test,
       "com.typesafe.akka" %% "akka-testkit"         % akkaVersion     % Test,
       "com.typesafe.akka" %% "akka-stream-testkit"  % akkaVersion     % Test,

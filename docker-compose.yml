@@ -8,23 +8,36 @@ services:
       - ../data/redis:/data
     entrypoint: redis-server --appendonly yes
   redis-cache:
-    image: erinkav/redis-cache
     build: .
     ports:
       - "8080:8080"
     volumes:
-      - .:/exampleapp
+      - .:/rediscache
       - ./.ivy2:/root/.ivy2
       - ./.sbt:/root/.sbt
     links:
       - redis
     depends_on:
       - redis
-    entrypoint: sbt run
     environment:
+      - PORT=8080
+      - HOST=redis-cache
       - REDISHOST=redis
-      - HOST=0.0.0.0
-
+  e2e:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    links:
+      - redis
+      - redis-cache
+    depends_on:
+      - redis
+      - redis-cache
+    environment:
+      - PORT=8081
+      - HOST=redis-cache
+      - REDISHOST=redis
+    command: "sbt test cucumber"
 volumes:
   redis-data:
 

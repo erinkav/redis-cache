@@ -6,6 +6,6 @@ WORKDIR /redis-cache
 
 COPY . /redis-cache
 
-EXPOSE 8080
+EXPOSE 8081
 
-CMD ["sbt", "test", "run"]
+CMD ["sbt", "test", "cucumber"]

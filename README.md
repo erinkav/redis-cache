@@ -1,7 +1,20 @@
+## Running the applications
+
+```
+> git clone https://github.com/erinkav/redis-cache
+
+> cd redis-cache
+
+> make test
+```
 
 ## Architecture
 
-How requests are handled:
+This redis proxy was implemented using Akka HTTP and the actor system to pass messages through the server. The two Actor classes are the RedisActor and the LocalLFUCacheActor.
+*RedisActor*: interfaces with the Redis cache to check if values are present. The Redis cache is also responsible for telling the LocalLFUCacheActor when it finds a value so it can be stored.
+*LocalLFUCacheActor*: has methods to get and to set values on the cache. Interfaces with the implementation of the LFU cache to get and set values in the local cache.
+
+How requests flow through the actor system:
  - Route ->
     - GET /key ->
         - LocalLFUCacheActor ->
@@ -33,7 +46,6 @@ The least frequently accessed value in the cache will be evicted when the cache 
   }
 ```
 
-
 ## Testing
 
 Unit tests can be run with `sbt test`
@@ -53,36 +65,38 @@ This implementation relies on the asynchronous communication between actors. The
 
 ## Features and Implementation
 
-HTTP web service - Clients interface to the Redis proxy through HTTP, with the Redis “GET” command mapped to the HTTP “GET” method. (1 hour)
-Single backing instance - Each instance of the proxy service is associated with a single Redis service (5 minutes)
-Cached GET - A GET request, directed at the proxy, returns the value of the specified key from the proxy’s local cache if the local cache contains a value for that key. If the local cache
+##### HTTP web service**
+Clients interface to the Redis proxy through HTTP, with the Redis “GET” command mapped to the HTTP “GET” method. (1 hour)
+
+##### Single backing instance
+Each instance of the proxy service is associated with a single Redis service (5 minutes)
+
+##### Cached GET
+A GET request, directed at the proxy, returns the value of the specified key from the proxy’s local cache if the local cache contains a value for that key. If the local cache
 does not contain a value for the specified key, it fetches the value from the backing Redis instance, using the Redis GET command, and stores it in the local cache,associated with the specified key. (1.5 hours)
- - Implemented first using the Akka lfu cache on the route. Later implemented in the project by creating a localLFUCache. The cache has at worst linear time get and set if all keys are viewed with the same frequency (1 hour total)
+ - Implemented first using the Akka lfu cache on the route. Later implemented in the project by creating a localLFUCache. The cache has at worst linear time get and set if all keys are viewed with the same frequency (45 min)
  - Global expiry - Entries added to the proxy cache are expired after being in the cache for a time (10 minutes)
  - LRU eviction -  Once the cache fills to capacity, the least recently used key is evicted (15 minutes)
  - Fixed key size The cache capacity is configured in terms of number of keys it retains. (5 minutes)
-Concurrent processing - Multiple clients are able to concurrently connect to the proxy up to some configurable maximum limit (1.5 hour)
- - Implemented asynchronous communication between actors to enable concurrent requests. Gatling test suite to test how the API handles the load and where it breaks down
-Configuration The following parameters are configurable at the proxy startup: Address of the backing Redis, Cache expiry time, Capacity, number of keys, TCP/IP port number the proxy listens on (10 min)
+
+##### Concurrent processing
+Multiple clients are able to concurrently connect to the proxy up to some configurable maximum limit (1.5 hour)
+ - Implemented asynchronous communication between actors to enable concurrent requests.
+ - Set up Gatling test suite to test how the API handles the load
+
+##### Configuration
+The following parameters are configurable at the proxy startup: Address of the backing Redis, Cache expiry time, Capacity, number of keys, TCP/IP port number the proxy listens on (10 min)
  - Application settings configured in src/main/resources/application.conf
-System tests - Automated systems tests confirm that the end-to-end system functions as specified. (30 min)
+
+##### System tests
+Automated systems tests confirm that the end-to-end system functions as specified. (30 min)
  - Cucumber end to end tests to validate requests and values set on Redis
-Platform - The software build and tests pass on a modern Linux or Mac OS distribution (1.5 hours)
+ - ScalaTest unit tests for functionality
+
+##### Platform - The software build and tests pass on a modern Linux or Mac OS distribution (2 hours)
 
 
 ### Improvements
 - Test the Scala Redis non-blocking library. Not included on the recommended list from Redis but could improve performance
 - Improve the set and get time for the LFU cache implementation
 - Environment specific configurations in tests and application
-
-build-sbt-docker-image:
-	docker build --tag sbt_wrapper --file sbt_wrapper.Dockerfile .
-
-start: redis-server --appendonly yes
-
-test:
-    docker run \
-	    --volume $$(pwd):/repo \
-	    --volume /var/run/docker.sock:/var/run/docker.sock \
-	    --net host \
-	    sbt_wrapper "project redis-cache" ";dockerComposeUp;test;dockerComposeStop"
