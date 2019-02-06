@@ -1,4 +1,4 @@
-## Running the applications
+## Running the application
 
 ```
 > git clone https://github.com/erinkav/redis-cache
@@ -14,25 +14,27 @@ This redis proxy was implemented using Akka HTTP and the actor system to pass me
 *RedisActor*: interfaces with the Redis cache to check if values are present. The Redis cache is also responsible for telling the LocalLFUCacheActor when it finds a value so it can be stored.
 *LocalLFUCacheActor*: has methods to get and to set values on the cache. Interfaces with the implementation of the LFU cache to get and set values in the local cache.
 
-How requests flow through the actor system:
- - Route ->
-    - GET /key ->
-        - LocalLFUCacheActor ->
-            - LocalLFUCache ->
-               - key found: LocalLFUCacheActor sends value to its caller
-               - key not present:
+How requests is routed through the actor system:
+```
+  Route ->
+     GET /key ->
+         LocalLFUCacheActor ->
+             LocalLFUCache ->
+                key found: LocalLFUCacheActor sends value to its caller
+                key not present:
                     LocalLFUCacheActor ->
-                        - RedisActor  ->
-                            - RedisActor sends value to caller
-                            - RedisActor ->
-                                - LocalLFUCacheActor to save value in cache
-    - GET /cache/key ->
-        - routeCache ->
+                         RedisActor  ->
+                             RedisActor sends value to caller
+                             RedisActor ->
+                                 LocalLFUCacheActor to save value in cache
+     GET /cache/key ->
+         routeCache ->
             - key found: value returned
             - key not present:
                     RedisActor ->
-                        - RedisActor sends value to caller
-                        - Akka caches value for route
+                         RedisActor sends value to caller
+                         Akka caches value for route
+```
 
 LFU Cache:
 
