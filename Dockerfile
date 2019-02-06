@@ -8,4 +8,4 @@ COPY . /redis-cache
 
 EXPOSE 8080
 
-RUN sbt run
+CMD ["sbt", "run"]

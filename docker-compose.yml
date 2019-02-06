@@ -9,10 +9,22 @@ services:
     entrypoint: redis-server --appendonly yes
   redis-cache:
     image: erinkav/redis-cache
+    build: .
     ports:
       - "8080:8080"
+    volumes:
+      - .:/exampleapp
+      - ./.ivy2:/root/.ivy2
+      - ./.sbt:/root/.sbt
+    links:
+      - redis
     depends_on:
       - redis
-    command: sbt run
+    entrypoint: sbt run
+    environment:
+      - REDISHOST=redis
+      - HOST=0.0.0.0
 
+volumes:
+  redis-data:
 

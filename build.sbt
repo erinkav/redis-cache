@@ -10,12 +10,8 @@ lazy val root = (project in file(".")).
     scalacOptions := Seq(
       "-encoding", "UTF-8", "-target:jvm-1.8", "-deprecation",
       "-feature", "-unchecked", "-language:implicitConversions", "-language:postfixOps"),
-    dockerExposedPorts := Seq(8080),
-    dockerImageCreationTask := (publishLocal in Docker).value,
-    dockerBaseImage := "hseeberger/scala-sbt",
-    dockerRepository := Some("erinkav"),
-    dockerExposedVolumes := Seq("/opt/docker/logs"),
     testPassUseCucumber := true,
+    testTagsToExecute := "ready",
     CucumberPlugin.glue := "steps/",
     unmanagedClasspath in Test += baseDirectory.value / "src/test/resources/features",
     name := "Redis Cache",
@@ -40,4 +36,4 @@ lazy val root = (project in file(".")).
       "io.cucumber"       % "cucumber-jvm"          % "2.0.1"         % Test,
       "io.cucumber"       % "cucumber-junit"        % "2.0.1"         % Test
     )
-  ).enablePlugins(GatlingPlugin, DockerPlugin, DockerComposePlugin, JavaAppPackaging, CucumberPlugin)
+  ).enablePlugins(GatlingPlugin, JavaAppPackaging, CucumberPlugin)
