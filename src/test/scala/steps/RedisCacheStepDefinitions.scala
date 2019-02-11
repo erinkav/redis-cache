@@ -1,5 +1,6 @@
 package steps
 
+import akka.http.scaladsl.model.StatusCodes
 import com.redis.RedisClient
 import com.typesafe.config.ConfigFactory
 import cucumber.api.PendingException
@@ -36,17 +37,19 @@ class RedisCacheStepDefinitions extends ScalaDsl with EN {
     assert(response.code == statusCode, s"Status code ${response.code} did not match expected $statusCode")
   }
 
-  Then("""^it "([^"]*)" exist in the Redis cache$""") { (responseValue: String) =>
-    responseValue match {
-      case "None" => assert(response.body.isEmpty)
-      case _ => assert(response.body == responseValue)
+  Then("""^it "([^"]*)" exist in the Redis cache$""") { (shouldCondition: String) =>
+    shouldCondition match {
+      case "should" => assert(redisClient.get(cacheKey).contains(cacheVal))
+      case "should_not" => assert(redisClient.get(cacheKey).isEmpty)
     }
+
   }
 
-  Then("""^it should return a response "([^"]*)"$""") { (shouldCondition: String) =>
+  Then("""^it "([^"]*)" return a response "([^"]*)"$""") { (shouldCondition: String, responseValue: String) =>
     shouldCondition match {
-      case "should" => assert(redisClient.get(cacheKey).get == cacheVal)
-      case "should_not" => assert(redisClient.get(cacheKey) == None)
+      case "should_not" => assert(response.code != 200, s"Expected error response but got: ${response.toString}")
+      case "should" => assert(response.body == responseValue, s"Body did not equal response value: " +
+        s"$responseValue did not match ${response.body}")
     }
   }
 

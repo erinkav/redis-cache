@@ -36,13 +36,11 @@ class RoutesSpec extends WordSpec with BeforeAndAfterAll with Matchers with Scal
       }
     }
 
-    "return empty list if no value is present in the cache" in {
+    "return a 404 if no value is present in the cache" in {
       val request = HttpRequest(uri = "/unknown")
       request ~> routes ~> check {
         assert(handled)
-        assert(status == StatusCodes.OK)
-        assert(responseAs[String] == "")
-        redisActor
+        assert(status == StatusCodes.NotFound)
       }
     }
 

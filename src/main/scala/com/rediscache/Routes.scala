@@ -50,8 +50,17 @@ trait Routes {
       get {
         path(Segment) { key =>
           val cachedValue: Future[Option[String]] = (localCacheActor ? GetCachedValue(key)).mapTo[Option[String]]
-          onSuccess(cachedValue) { returnedVal =>
-            complete(returnedVal)
+          onSuccess(cachedValue) {
+            case None => {
+              complete(StatusCodes.NotFound)
+            }
+            case Some(v) => {
+              complete((StatusCodes.OK, v))
+            }
+            case _ => {
+              println("WHAT")
+              complete(StatusCodes.InternalServerError)
+            }
           }
         }
       },
@@ -61,8 +70,13 @@ trait Routes {
             cache(akkaLfuCache, keyerFunction) {
               val cacheValue: Future[Option[String]] =
                 (redisActor ? GetValue(key)).mapTo[Option[String]]
-              onSuccess(cacheValue) { returnedVal =>
-                complete(returnedVal)
+              onSuccess(cacheValue) {
+                case None => {
+                  complete(StatusCodes.NotFound)
+                }
+                case Some(v) => {
+                  complete((StatusCodes.OK, v))
+                }
               }
             }
           }

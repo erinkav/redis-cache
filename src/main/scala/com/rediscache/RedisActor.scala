@@ -40,9 +40,12 @@ class RedisActor extends Actor with ActorLogging {
       log.info(s"$key found in Redis cache ${value.toString}")
 
       // Parent actor is the localLFUCache. Update cache with value found in Redis. This is an asynchonous operation
-      context.parent ! SetCachedValue(key, value)
+      if (value.nonEmpty) {
+        context.parent ! SetCachedValue(key, value)
+      }
       // Request was forwarded to this actor. Send Tell back to caller
       sender() ! value
+
     case _ => throw new Exception("Unidentified call to Redis actor")
 
   }
