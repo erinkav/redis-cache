@@ -11,6 +11,8 @@ class LocalLfuCacheSpec extends WordSpecLike with Matchers with BeforeAndAfterAl
   val smallCache = new LocalLfuCache(capacity = 4, globalExpiration = Duration.ofSeconds(5))
   "It should set values if not present in the cache" in {
     smallCache.set("test1", Option("value1"))
+    println(smallCache.frequencies.values.head.head)
+    println(smallCache.valuesMap.keySet)
     assert(smallCache.get("test1") == Option("value1"))
   }
 
